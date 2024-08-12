@@ -6,11 +6,9 @@ export const getUsers = async (_, res) => {
     const data = await UserModel.find({});
     const filterData = data.map((user) => ({
       id: user._doc._id,
-      firstname: user._doc.firstname,
-      lastname: user._doc.lastname,
+
       email: user._doc.email,
-      direccion: user._doc.direccion,
-      numberphone: user._doc.numberphone,
+
       isAdmin: user._doc.isAdmin,
     }));
     res.json({ data: filterData, message: 'Usuarios encontrados' });
@@ -27,11 +25,7 @@ export const postUser = async (req, res) => {
   const hashPassword = bcrypt.hashSync(body.password, 10);
 
   const newUser = new UserModel({
-    firstname: body.firstname,
-    lastname: body.lastname,
     email: body.email,
-    direccion: body.direccion,
-    numberphone: body.numberphone,
     password: hashPassword,
     isActive: true,
   });
@@ -48,7 +42,7 @@ export const postUser = async (req, res) => {
         data: null,
         message: 'El email ya se encuentra registrado',
       });
-    // eslint-disable-next-line no-useless-return
+      // eslint-disable-next-line no-useless-return
       return;
     }
   }
@@ -84,7 +78,7 @@ export const putUser = async (req, res) => {
         data: null,
         message: 'El email ya se encuentra registrado',
       });
-    // eslint-disable-next-line no-useless-return
+      // eslint-disable-next-line no-useless-return
       return;
     }
   }

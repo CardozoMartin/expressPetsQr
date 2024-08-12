@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(morgan('dev'));
 
-const allowedOrigins = ['https://mismascotasqr.netlify.app'];
+const allowedOrigins = ['https://petsqr.netlify.app'];
 
 app.use(cors({
   origin: function (origin, callback) {
