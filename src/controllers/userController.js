@@ -6,9 +6,9 @@ export const getUsers = async (_, res) => {
     const data = await UserModel.find({});
     const filterData = data.map((user) => ({
       id: user._doc._id,
-
+      name: user._doc.name,
       email: user._doc.email,
-
+      surname: user._doc.surname,
       isAdmin: user._doc.isAdmin,
     }));
     res.json({ data: filterData, message: 'Usuarios encontrados' });
@@ -26,6 +26,8 @@ export const postUser = async (req, res) => {
 
   const newUser = new UserModel({
     email: body.email,
+    name: body.name,
+    surname: body.surname,
     password: hashPassword,
     isActive: true,
   });
