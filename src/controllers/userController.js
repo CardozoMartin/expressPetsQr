@@ -174,3 +174,53 @@ export const deleteUser = async (req, res) => {
     return;
   }
 };
+
+export const recoverPassword = async(req,res)=>{
+  const { email } = req.body;
+
+  if(!email){
+    return res.status(400).json({message:"El campo de correo electronico es obligatorio"});
+  }
+
+  try {
+    //buscamos el usuario por email
+    const usuario = await UserModel.findOne({email});
+
+    if(!usuario){
+      return res.status(404).json({message:"El correo electronico no esta registrado"});
+    }
+
+    const desencriptarPassword = usuario.password;
+     // Configurar el correo con la contraseña
+     const mailOptions = {
+      from: "martincardozo1993xp@gmail.com",
+      to: email,
+      subject: "Recuperación de contraseña",
+      html: `
+        <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 10px; padding: 20px; background-color: #f9f9f9;">
+          <h2 style="color: #4CAF50;">Recuperación de Contraseña</h2>
+          <p style="color: #333;">Hola ${usuario.nombre},</p>
+          <p style="color: #333;">Tu contraseña actual es:</p>
+          <p style="font-size: 18px; font-weight: bold; color: #4CAF50;">${usuario.password}</p>
+          <p style="color: #555; margin-top: 20px;">Si no solicitaste este correo, puedes ignorarlo.</p>
+          <p style="color: #777; font-size: 12px;">&copy; 2024 Nuestra Plataforma. Todos los derechos reservados.</p>
+        </div>
+      `,
+    };
+
+    // Enviar el correo
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error al enviar el correo:", error);
+        return res.status(500).json({ message: "Error al enviar el correo" });
+      }
+
+      console.log("Correo enviado:", info.response);
+      res.status(200).json({ message: "Correo enviado exitosamente" });
+    });
+  } catch (error) {
+    console.error("Error en el proceso de recuperación:", error);
+    res.status(500).json({ message: "Error al procesar la solicitud", error });
+  }
+
+}

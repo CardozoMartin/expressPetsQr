@@ -5,6 +5,7 @@ import {
   getUsers,
   postUser,
   putUser,
+  recoverPassword
 } from '../controllers/userController.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import {
@@ -21,6 +22,7 @@ router.post(
   (res, req, next) => validateBody(req, res, next, postUserSchema),
   postUser,
 );
+router.post("/recovery",recoverPassword)
 router.put(
   '/:id',
   isAuthenticated,

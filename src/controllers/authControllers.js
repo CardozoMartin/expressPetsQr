@@ -10,15 +10,30 @@ export const postLogin = async (req, res) => {
   } = req;
 
   try {
-    const data = await UserModel.findOne({ email, isActive: true });
+    // Buscar el usuario por correo y verificar que esté verificado
+    const data = await UserModel.findOne({ email, isVerified: true });
 
-    if (!data || !bcrypt.compareSync(password, data.password)) {
-      res.status(400).json({
+    // Verificar si el usuario no existe o si la contraseña no coincide
+    if (!data) {
+      return res.status(400).json({
         data: null,
-        message: 'Usuario o contraseña incorrecta',
+        message: 'Usuario no encontrado o correo no verificado',
       });
-      return;
     }
+
+    if (!bcrypt.compareSync(password, data.password)) {
+      return res.status(400).json({
+        data: null,
+        message: 'Contraseña incorrecta',
+      });
+    }
+    if (!data.isVerified) {
+      return res.status(400).json({
+        data: null,
+        message: 'Cuenta no verificada',
+      });
+    }
+
     const userInfo = {
       user: {
         id: data._doc._id,
@@ -28,6 +43,8 @@ export const postLogin = async (req, res) => {
         isAdmin: data._doc.isAdmin,
       },
     };
+
+    // Generar el token
     const token = jwt.sign(userInfo, JWT_SECRET_KEY, {
       expiresIn: '1h',
     });
@@ -39,7 +56,8 @@ export const postLogin = async (req, res) => {
   } catch (e) {
     res.status(500).json({
       data: null,
-      message: 'Ocurrio un error al iniciar sesion',
+      message: 'Ocurrió un error al iniciar sesión',
     });
   }
 };
+
