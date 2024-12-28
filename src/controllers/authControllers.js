@@ -1,4 +1,5 @@
-import UserModel from 'moongose/models/user_model.js';
+import UserModel from '../models/userSchema.js';
+
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
@@ -10,37 +11,42 @@ export const postLogin = async (req, res) => {
   } = req;
 
   try {
-    // Buscar el usuario por correo y verificar que esté verificado
-    const data = await UserModel.findOne({ email, isVerified: true });
+    // Buscar el usuario por correo
+    const data = await UserModel.findOne({ email });
 
-    // Verificar si el usuario no existe o si la contraseña no coincide
+    // Verificar si el usuario no existe
     if (!data) {
       return res.status(400).json({
         data: null,
-        message: 'Usuario no encontrado o correo no verificado',
+        message: 'Usuario no encontrado',
       });
     }
 
-    if (!bcrypt.compareSync(password, data.password)) {
+    // Verificar si la cuenta no está verificada
+    if (!data.isVerified) {
+      return res.status(400).json({
+        data: null,
+        message: 'Cuenta no verificada. Por favor, verifica tu correo.',
+      });
+    }
+
+    // Verificar si la contraseña es incorrecta
+    const passwordMatch = bcrypt.compareSync(password, data.password);
+    if (!passwordMatch) {
       return res.status(400).json({
         data: null,
         message: 'Contraseña incorrecta',
       });
     }
-    if (!data.isVerified) {
-      return res.status(400).json({
-        data: null,
-        message: 'Cuenta no verificada',
-      });
-    }
 
+    // Crear payload para el token
     const userInfo = {
       user: {
-        id: data._doc._id,
-        firstname: data._doc.firstname,
-        lastname: data._doc.lastname,
-        username: data._doc.username,
-        isAdmin: data._doc.isAdmin,
+        id: data._id,
+        firstname: data.firstname,
+        lastname: data.lastname,
+        username: data.username,
+        isAdmin: data.isAdmin,
       },
     };
 
@@ -49,6 +55,7 @@ export const postLogin = async (req, res) => {
       expiresIn: '1h',
     });
 
+    // Responder con el token
     res.json({
       data: token,
       message: 'Usuario logueado exitosamente',
@@ -60,4 +67,3 @@ export const postLogin = async (req, res) => {
     });
   }
 };
-
