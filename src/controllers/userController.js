@@ -2,13 +2,14 @@ import bcrypt from 'bcryptjs';
 import UserModel from '../models/userSchema.js';
 import crypto from 'crypto';
 import nodemailer from "nodemailer";
-
+const emailUser = process.env.EMAIL_USER;
+const passUser = process.env.EMAIL_PASS;
 // Configurar el transporte de correo con nodemailer
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "martincardozo1993xp@gmail.com",
-    pass: "fvtp ptmw pdgy atgg", // Contraseña de aplicación
+    user: emailUser,
+    pass: passUser, // Contraseña de aplicación
   },
 });
 
@@ -33,7 +34,7 @@ export const getUsers = async (_, res) => {
 
 export const postUser = async (req, res) => {
   const { body } = req;
-  
+
   // Crear el hash de la contraseña
   const hashPassword = bcrypt.hashSync(body.password, 10);
   // Crear el usuario (pero aún no guardarlo)
@@ -45,10 +46,10 @@ export const postUser = async (req, res) => {
     isActive: false,
     verificationToken: body.verificationToken,  // Usar el token generado
   });
-  
+
   // Generar un token de verificación
-  
-  
+
+
   try {
     const verificationToken = crypto.randomBytes(32).toString("hex");
     newUser.verificationToken = verificationToken;
@@ -57,11 +58,11 @@ export const postUser = async (req, res) => {
     // Guardar el usuario en la base de datos
     await newUser.save();
 
-  
-    
+
+
     // Configurar el correo de verificación
     const mailOptions = {
-      from: "martincardozo1993xp@gmail.com",
+      from: emailUser,
       to: body.email,
       subject: "Verifica tu correo electrónico",
       html: `
@@ -175,24 +176,24 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-export const recoverPassword = async(req,res)=>{
+export const recoverPassword = async (req, res) => {
   const { email } = req.body;
 
-  if(!email){
-    return res.status(400).json({message:"El campo de correo electronico es obligatorio"});
+  if (!email) {
+    return res.status(400).json({ message: "El campo de correo electronico es obligatorio" });
   }
 
   try {
     //buscamos el usuario por email
-    const usuario = await UserModel.findOne({email});
+    const usuario = await UserModel.findOne({ email });
 
-    if(!usuario){
-      return res.status(404).json({message:"El correo electronico no esta registrado"});
+    if (!usuario) {
+      return res.status(404).json({ message: "El correo electronico no esta registrado" });
     }
 
     const desencriptarPassword = usuario.password;
-     // Configurar el correo con la contraseña
-     const mailOptions = {
+    // Configurar el correo con la contraseña
+    const mailOptions = {
       from: "martincardozo1993xp@gmail.com",
       to: email,
       subject: "Recuperación de contraseña",
