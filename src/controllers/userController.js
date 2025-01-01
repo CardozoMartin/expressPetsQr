@@ -194,7 +194,7 @@ export const recoverPassword = async (req, res) => {
     const desencriptarPassword = usuario.password;
     // Configurar el correo con la contraseña
     const mailOptions = {
-      from: "martincardozo1993xp@gmail.com",
+      from: emailUser,
       to: email,
       subject: "Recuperación de contraseña",
       html: `

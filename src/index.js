@@ -9,6 +9,7 @@ import userRoute from './routes/useRoutes.js';
 import authRoute from './routes/authRoute.js';
 import petRoute from './routes/petRoute.js';
 import commentRoute from './routes/commentRoute.js';
+import tokenRoute from './routes/tokenRoute.js'
 import UserModel from './models/userSchema.js';
 
 const app = express();
@@ -42,28 +43,7 @@ app.use('/api/v1/registro', userRoute);
 app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/pet', petRoute);
 app.use('/api/v1/comments', commentRoute);
-
-app.get("/api/v1/verificar/:token", async (req, res) => {
-  const { token } = req.params;
-
-  try {
-    const usuario = await UserModel.findOne({ verificationToken: token });
-
-    if (!usuario) {
-      return res.sendFile(path.join(__dirname, 'public', 'error.html'));
-      // Página de error
-    }
-
-    usuario.isVerified = true;
-    usuario.verificationToken = null;
-    await usuario.save();
-
-    res.sendFile(path.join(__dirname, 'public', 'verify.html')); // Página de éxito
-  } catch (error) {
-    console.error("Error al verificar el correo:", error);
-    res.status(500).sendFile(path.join(__dirname, 'public/error.html')); // Página de error genérica
-  }
-});
+app.use("/api/v1/verificar",tokenRoute );
 
 // Iniciar el servidor
 app.listen(PORT, () => {
