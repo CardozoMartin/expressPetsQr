@@ -15,8 +15,8 @@ const Pet = new mongoose.Schema({
   },
   direccion: { type: String, require: true },
   numberphone: { type: String, require: true },
-  facebook:{type: String},
-  instagram:{type: String},
+  facebook: { type: String },
+  instagram: { type: String },
   content: { type: String },
   image: {
     type: String,

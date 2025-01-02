@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restablecer contraseña</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      margin: 50px auto;
+      background-color: white;
+      padding: 30px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    h2 {
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .error {
+      color: red;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Restablecer Contraseña</h2>
+    <form id="resetPasswordForm">
+      <input type="password" id="newPassword" placeholder="Nueva contraseña" required />
+      <input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña" required />
+      <button type="submit">Restablecer contraseña</button>
+    </form>
+    <p class="error" id="errorMessage"></p>
+  </div>
+
+  <script>
+    // Obtener el token de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    
+    const form = document.getElementById('resetPasswordForm');
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const errorMessage = document.getElementById('errorMessage');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const newPassword = newPasswordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+
+      if (newPassword !== confirmPassword) {
+        errorMessage.textContent = 'Las contraseñas no coinciden.';
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:5000/api/v1/reset/${token}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ newPassword }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert('Contraseña restablecida exitosamente');
+          window.location.href = '/login.html';  // Redirigir al login
+        } else {
+          errorMessage.textContent = data.message || 'Ocurrió un error al restablecer la contraseña';
+        }
+      } catch (error) {
+        errorMessage.textContent = 'Error al contactar al servidor';
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>

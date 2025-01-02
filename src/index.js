@@ -1,3 +1,4 @@
+// index.js
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -9,7 +10,7 @@ import userRoute from './routes/useRoutes.js';
 import authRoute from './routes/authRoute.js';
 import petRoute from './routes/petRoute.js';
 import commentRoute from './routes/commentRoute.js';
-import tokenRoute from './routes/tokenRoute.js'
+import tokenRoute from './routes/tokenRoute.js';
 import UserModel from './models/userSchema.js';
 
 const app = express();
@@ -22,28 +23,36 @@ const __dirname = path.dirname(__filename);
 // Middlewares
 app.use(morgan('dev'));
 
-const allowedOrigins = ['https://petsqr.netlify.app', 'http://localhost:5173'];
+const allowedOrigins = [
+  'https://petsqr.netlify.app', 
+  'http://localhost:5173',
+  'http://localhost:5000', // Agregamos el origen del backend
+  'http://localhost' // Para cubrir diferentes puertos locales
+];
+
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // Permitir solicitudes sin origen
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
+    // Permitir solicitudes del navegador cuando accede directamente al HTML
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
     } else {
-      return callback(new Error('Not allowed by CORS'));
+      callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Especificar métodos permitidos
+  allowedHeaders: ['Content-Type', 'Authorization'] // Especificar headers permitidos
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rutas
+// Rutas - Asegúrate de que userRoute incluya la ruta de reset
 app.use('/api/v1/registro', userRoute);
 app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/pet', petRoute);
 app.use('/api/v1/comments', commentRoute);
-app.use("/api/v1/verificar",tokenRoute );
+app.use("/api/v1/verificar", tokenRoute);
 
 // Iniciar el servidor
 app.listen(PORT, () => {

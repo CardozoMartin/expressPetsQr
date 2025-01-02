@@ -68,7 +68,7 @@ export const postUser = async (req, res) => {
       html: `
         <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 10px; padding: 20px; background-color: #f9f9f9;">
           <h2 style="color: #4CAF50;">¡Bienvenido, ${body.name}!</h2>
-          <p style="color: #333;">Gracias por registrarte en nuestra plataforma. Por favor, haz clic en el botón de abajo para verificar tu correo electrónico.</p>
+          <p style="color: #333;">Gracias por registrarte en PetsQr. Por favor, haz clic en el botón de abajo para verificar tu correo electrónico.</p>
           <a 
             href="${verificationLink}" 
             style="display: inline-block; margin-top: 20px; padding: 10px 20px; color: white; background-color: #4CAF50; text-decoration: none; font-size: 16px; border-radius: 5px;"
@@ -76,7 +76,7 @@ export const postUser = async (req, res) => {
             Verificar correo
           </a>
           <p style="color: #555; margin-top: 20px;">Si no solicitaste esta cuenta, ignora este mensaje.</p>
-          <p style="color: #777; font-size: 12px;">&copy; 2024 Nuestra Plataforma. Todos los derechos reservados.</p>
+          <p style="color: #777; font-size: 12px;">&copy; 2025 PetsQr. Todos los derechos reservados.</p>
         </div>
       `,
     };
@@ -176,52 +176,201 @@ export const deleteUser = async (req, res) => {
   }
 };
 
+
+
 export const recoverPassword = async (req, res) => {
   const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ message: "El campo de correo electronico es obligatorio" });
-  }
+  if (!email) return res.status(400).json({ message: "El campo de correo electrónico es obligatorio" });
 
   try {
-    //buscamos el usuario por email
     const usuario = await UserModel.findOne({ email });
+    if (!usuario) return res.status(404).json({ message: "El correo electrónico no está registrado" });
 
-    if (!usuario) {
-      return res.status(404).json({ message: "El correo electronico no esta registrado" });
-    }
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    usuario.resetToken = resetToken;
+    usuario.resetTokenExpiration = Date.now() + 3600000; // 1 hora de expiración
+    await usuario.save();
 
-    const desencriptarPassword = usuario.password;
-    // Configurar el correo con la contraseña
+    // El link ahora usa la ruta /reset/:token
+    const resetLink = `http://localhost:5000/api/v1/registro/reset/${resetToken}`;
+
     const mailOptions = {
       from: emailUser,
       to: email,
       subject: "Recuperación de contraseña",
-      html: `
-        <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 10px; padding: 20px; background-color: #f9f9f9;">
-          <h2 style="color: #4CAF50;">Recuperación de Contraseña</h2>
-          <p style="color: #333;">Hola ${usuario.nombre},</p>
-          <p style="color: #333;">Tu contraseña actual es:</p>
-          <p style="font-size: 18px; font-weight: bold; color: #4CAF50;">${usuario.password}</p>
-          <p style="color: #555; margin-top: 20px;">Si no solicitaste este correo, puedes ignorarlo.</p>
-          <p style="color: #777; font-size: 12px;">&copy; 2024 Nuestra Plataforma. Todos los derechos reservados.</p>
-        </div>
-      `,
+      html: `<p>Haga clic en el siguiente enlace para restablecer su contraseña: <a href="${resetLink}">Restablecer mi contraseña</a></p>`
     };
 
-    // Enviar el correo
     transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Error al enviar el correo:", error);
-        return res.status(500).json({ message: "Error al enviar el correo" });
-      }
-
-      console.log("Correo enviado:", info.response);
+      if (error) return res.status(500).json({ message: "Error al enviar el correo" });
       res.status(200).json({ message: "Correo enviado exitosamente" });
     });
   } catch (error) {
-    console.error("Error en el proceso de recuperación:", error);
     res.status(500).json({ message: "Error al procesar la solicitud", error });
   }
+};
 
-}
+// Nuevo middleware para verificar token antes de mostrar el formulario
+export const showResetForm = async (req, res) => {
+  const { token } = req.params;
+  
+  try {
+    const usuario = await UserModel.findOne({
+      resetToken: token,
+      resetTokenExpiration: { $gt: Date.now() }
+    });
+
+    if (!usuario) {
+      return res.send(`
+        <html>
+          <head>
+            <title>Error</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
+              .error { color: red; }
+            </style>
+          </head>
+          <body>
+            <h1 class="error">Token inválido o expirado</h1>
+            <p>Por favor, solicite un nuevo enlace de recuperación de contraseña.</p>
+          </body>
+        </html>
+      `);
+    }
+
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Restablecer Contraseña</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 20px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              min-height: 100vh;
+              background-color: #f5f5f5;
+            }
+            .container {
+              background-color: white;
+              padding: 30px;
+              border-radius: 8px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              max-width: 400px;
+              width: 100%;
+            }
+            h1 {
+              text-align: center;
+              color: #333;
+              margin-bottom: 20px;
+            }
+            form {
+              display: flex;
+              flex-direction: column;
+            }
+            input {
+              padding: 10px;
+              margin: 10px 0;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+            }
+            button {
+              padding: 10px;
+              background-color: #007bff;
+              color: white;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+              margin-top: 10px;
+            }
+            button:hover {
+              background-color: #0056b3;
+            }
+            .error {
+              color: red;
+              margin-top: 10px;
+              text-align: center;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Restablecer Contraseña</h1>
+            <form action="/api/v1/registro/reset/${token}" method="POST">
+              <input type="password" name="newPassword" placeholder="Nueva contraseña" required>
+              <input type="password" name="confirmPassword" placeholder="Confirmar contraseña" required>
+              <button type="submit">Cambiar Contraseña</button>
+            </form>
+            <div id="error" class="error"></div>
+          </div>
+          <script>
+            const form = document.querySelector('form');
+            const error = document.getElementById('error');
+            
+            form.addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const newPassword = form.newPassword.value;
+              const confirmPassword = form.confirmPassword.value;
+              
+              if (newPassword !== confirmPassword) {
+                error.textContent = 'Las contraseñas no coinciden';
+                return;
+              }
+              
+              try {
+                const response = await fetch(form.action, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ newPassword })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                  alert('Contraseña actualizada exitosamente');
+                  window.location.href = '/login'; // Redirige al login
+                } else {
+                  error.textContent = data.message || 'Error al actualizar la contraseña';
+                }
+              } catch (err) {
+                error.textContent = 'Error al procesar la solicitud';
+              }
+            });
+          </script>
+        </body>
+      </html>
+    `);
+  } catch (error) {
+    res.status(500).send('Error al procesar la solicitud');
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { newPassword } = req.body;
+
+  if (!newPassword) return res.status(400).json({ message: "La nueva contraseña es obligatoria" });
+
+  try {
+    const usuario = await UserModel.findOne({
+      resetToken: token,
+      resetTokenExpiration: { $gt: Date.now() },
+    });
+
+    if (!usuario) return res.status(400).json({ message: "Token inválido o expirado" });
+
+    usuario.password = bcrypt.hashSync(newPassword, 10);
+    usuario.resetToken = undefined;
+    usuario.resetTokenExpiration = undefined;
+    await usuario.save();
+
+    res.status(200).json({ message: "Contraseña actualizada exitosamente" });
+  } catch (error) {
+    res.status(500).json({ message: "Error al restablecer la contraseña", error });
+  }
+};
