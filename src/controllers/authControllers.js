@@ -43,10 +43,9 @@ export const postLogin = async (req, res) => {
     const userInfo = {
       user: {
         id: data._id,
-        firstname: data.firstname,
-        lastname: data.lastname,
-        username: data.username,
-        isAdmin: data.isAdmin,
+        name: data.name,
+        surname: data.surname,
+        email: data.email,
       },
     };
 

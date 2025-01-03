@@ -1,13 +1,16 @@
 import mongoose from 'mongoose';
 
 const Coment = new mongoose.Schema({
-  comments: { type: String },
+  name:{
+    type: String,
+  },
+  surname:{
+    type: String,
+  },
   image: {
     type: String,
   },
-  userName:{
-    type: String,
-  },
+  comments: { type: String },
   userID: {
     type: String,
     required: true,
