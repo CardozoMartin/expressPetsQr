@@ -198,8 +198,33 @@ export const recoverPassword = async (req, res) => {
       from: emailUser,
       to: email,
       subject: "Recuperación de contraseña",
-      html: `<p>Haga clic en el siguiente enlace para restablecer su contraseña: <a href="${resetLink}">Restablecer mi contraseña</a></p>`
+      html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 8px;">
+        <h2 style="color: #007bff; text-align: center; margin-bottom: 20px;">Recuperación de Contraseña</h2>
+        <p style="color: #333; font-size: 16px; line-height: 1.5;">
+          Hola, 
+        </p>
+        <p style="color: #333; font-size: 16px; line-height: 1.5;">
+          Hemos recibido una solicitud para restablecer tu contraseña. Si no realizaste esta solicitud, puedes ignorar este correo.
+        </p>
+        <p style="color: #333; font-size: 16px; line-height: 1.5;">
+          Para restablecer tu contraseña, haz clic en el siguiente botón:
+        </p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="${resetLink}" style="text-decoration: none; background-color: #007bff; color: white; padding: 10px 20px; border-radius: 5px; font-size: 16px; display: inline-block;">Restablecer mi contraseña</a>
+        </div>
+       
+       
+        <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px;">
+          Este enlace es válido solo por 24 horas.
+        </p>
+        <p style="color: #999; font-size: 12px; text-align: center; margin-top: 10px;">
+          Gracias,<br>El equipo de soporte de PetsQr.
+        </p>
+      </div>
+      `,
     };
+    
 
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) return res.status(500).json({ message: "Error al enviar el correo" });
@@ -240,100 +265,87 @@ export const showResetForm = async (req, res) => {
 
     res.send(`
       <!DOCTYPE html>
-      <html>
+      <html lang="es">
         <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Restablecer Contraseña</title>
+          <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+          />
           <style>
             body {
-              font-family: Arial, sans-serif;
-              margin: 0;
-              padding: 20px;
+              min-height: 100vh;
               display: flex;
               justify-content: center;
               align-items: center;
-              min-height: 100vh;
               background-color: #f5f5f5;
             }
-            .container {
-              background-color: white;
-              padding: 30px;
-              border-radius: 8px;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            .card {
               max-width: 400px;
               width: 100%;
-            }
-            h1 {
-              text-align: center;
-              color: #333;
-              margin-bottom: 20px;
-            }
-            form {
-              display: flex;
-              flex-direction: column;
-            }
-            input {
-              padding: 10px;
-              margin: 10px 0;
-              border: 1px solid #ddd;
-              border-radius: 4px;
-            }
-            button {
-              padding: 10px;
-              background-color: #007bff;
-              color: white;
-              border: none;
-              border-radius: 4px;
-              cursor: pointer;
-              margin-top: 10px;
-            }
-            button:hover {
-              background-color: #0056b3;
-            }
-            .error {
-              color: red;
-              margin-top: 10px;
-              text-align: center;
             }
           </style>
         </head>
         <body>
-          <div class="container">
-            <h1>Restablecer Contraseña</h1>
-            <form action="/api/v1/registro/reset/${token}" method="POST">
-              <input type="password" name="newPassword" placeholder="Nueva contraseña" required>
-              <input type="password" name="confirmPassword" placeholder="Confirmar contraseña" required>
-              <button type="submit">Cambiar Contraseña</button>
-            </form>
-            <div id="error" class="error"></div>
+          <div class="card shadow-lg border-0">
+            <div class="card-body">
+              <h1 class="h4 text-center text-gray-900 mb-4 fw-bold">Restablecer Contraseña</h1>
+              <form id="resetPasswordForm" action="/api/v1/registro/reset/${token}" method="POST">
+                <div class="mb-3">
+                  <input
+                    type="password"
+                    name="newPassword"
+                    class="form-control"
+                    placeholder="Nueva contraseña"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    class="form-control"
+                    placeholder="Confirmar contraseña"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-warning w-100">
+                  Cambiar Contraseña
+                </button>
+              </form>
+              <div id="error" class="text-danger mt-3 text-center"></div>
+            </div>
           </div>
           <script>
-            const form = document.querySelector('form');
+            const form = document.getElementById('resetPasswordForm');
             const error = document.getElementById('error');
-            
+      
             form.addEventListener('submit', async (e) => {
               e.preventDefault();
               const newPassword = form.newPassword.value;
               const confirmPassword = form.confirmPassword.value;
-              
+      
               if (newPassword !== confirmPassword) {
                 error.textContent = 'Las contraseñas no coinciden';
                 return;
               }
-              
+      
               try {
                 const response = await fetch(form.action, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify({ newPassword })
+                  body: JSON.stringify({ newPassword }),
                 });
-                
+      
                 const data = await response.json();
-                
+      
                 if (response.ok) {
                   alert('Contraseña actualizada exitosamente');
-                  window.location.href = '/login'; // Redirige al login
+                  window.location.href = '/login';
                 } else {
                   error.textContent = data.message || 'Error al actualizar la contraseña';
                 }
@@ -342,9 +354,14 @@ export const showResetForm = async (req, res) => {
               }
             });
           </script>
+          <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+          ></script>
         </body>
       </html>
-    `);
+      `);
+      
+      
   } catch (error) {
     res.status(500).send('Error al procesar la solicitud');
   }
