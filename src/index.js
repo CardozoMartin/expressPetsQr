@@ -22,6 +22,7 @@ app.use(morgan('dev'));
 
 const allowedOrigins = [
   'https://petsqr.netlify.app', 
+  'https://serverpetsqr.onrender.com',
   'http://localhost:5173',
   'http://localhost:5000', // Agregamos el origen del backend
   'http://localhost' // Para cubrir diferentes puertos locales
