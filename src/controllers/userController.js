@@ -265,101 +265,128 @@ export const showResetForm = async (req, res) => {
     }
 
     res.send(`
-      <!DOCTYPE html>
-      <html lang="es">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Restablecer Contraseña</title>
-          <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-          />
-          <style>
-            body {
-              min-height: 100vh;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              background-color: #f5f5f5;
-            }
-            .card {
-              max-width: 400px;
-              width: 100%;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="card shadow-lg border-0">
-            <div class="card-body">
-              <h1 class="h4 text-center text-gray-900 mb-4 fw-bold">Restablecer Contraseña</h1>
-              <form id="resetPasswordForm" action="/api/v1/registro/reset/${token}" method="POST">
-                <div class="mb-3">
-                  <input
-                    type="password"
-                    name="newPassword"
-                    class="form-control"
-                    placeholder="Nueva contraseña"
-                    required
-                  />
-                </div>
-                <div class="mb-3">
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    class="form-control"
-                    placeholder="Confirmar contraseña"
-                    required
-                  />
-                </div>
-                <button type="submit" class="btn btn-warning w-100">
-                  Cambiar Contraseña
-                </button>
-              </form>
-              <div id="error" class="text-danger mt-3 text-center"></div>
-            </div>
+     <!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Restablecer Contraseña</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Incluir SweetAlert2 -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css"
+    />
+    <style>
+      body {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f5f5f5;
+      }
+      .card {
+        max-width: 400px;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card shadow-lg border-0">
+      <div class="card-body">
+        <h1 class="h4 text-center text-gray-900 mb-4 fw-bold">Restablecer Contraseña</h1>
+        <form id="resetPasswordForm" action="/api/v1/registro/reset/${token}" method="POST">
+          <div class="mb-3">
+            <input
+              type="password"
+              name="newPassword"
+              class="form-control"
+              placeholder="Nueva contraseña"
+              required
+            />
           </div>
-          <script>
-            const form = document.getElementById('resetPasswordForm');
-            const error = document.getElementById('error');
-      
-            form.addEventListener('submit', async (e) => {
-              e.preventDefault();
-              const newPassword = form.newPassword.value;
-              const confirmPassword = form.confirmPassword.value;
-      
-              if (newPassword !== confirmPassword) {
-                error.textContent = 'Las contraseñas no coinciden';
-                return;
-              }
-      
-              try {
-                const response = await fetch(form.action, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ newPassword }),
-                });
-      
-                const data = await response.json();
-      
-                if (response.ok) {
-                  alert('Contraseña actualizada exitosamente');
-                  window.location.href = 'https://petsqr.netlify.app/login';
-                } else {
-                  error.textContent = data.message || 'Error al actualizar la contraseña';
-                }
-              } catch (err) {
-                error.textContent = 'Error al procesar la solicitud';
-              }
+          <div class="mb-3">
+            <input
+              type="password"
+              name="confirmPassword"
+              class="form-control"
+              placeholder="Confirmar contraseña"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-warning w-100">
+            Cambiar Contraseña
+          </button>
+        </form>
+        <div id="error" class="text-danger mt-3 text-center"></div>
+      </div>
+    </div>
+    <script>
+      const form = document.getElementById('resetPasswordForm');
+      const error = document.getElementById('error');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newPassword = form.newPassword.value;
+        const confirmPassword = form.confirmPassword.value;
+
+        if (newPassword !== confirmPassword) {
+          error.textContent = 'Las contraseñas no coinciden';
+          return;
+        }
+
+        try {
+          const response = await fetch(form.action, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ newPassword }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            // Usar SweetAlert para mostrar el éxito
+            Swal.fire({
+              title: '¡Éxito!',
+              text: 'Contraseña actualizada exitosamente',
+              icon: 'success',
+              confirmButtonText: 'Aceptar',
+            }).then(() => {
+              window.location.href = 'https://petsqr.netlify.app/login';
             });
-          </script>
-          <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-          ></script>
-        </body>
-      </html>
+          } else {
+            // Usar SweetAlert para mostrar el error
+            Swal.fire({
+              title: '¡Error!',
+              text: data.message || 'Error al actualizar la contraseña',
+              icon: 'error',
+              confirmButtonText: 'Aceptar',
+            });
+          }
+        } catch (err) {
+          // Usar SweetAlert para mostrar un error en el catch
+          Swal.fire({
+            title: '¡Error!',
+            text: 'Error al procesar la solicitud',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+          });
+        }
+      });
+    </script>
+    <!-- Incluir la librería de SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    ></script>
+  </body>
+</html>
+
       `);
       
       
