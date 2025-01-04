@@ -2,8 +2,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
+
 
 import './database/database.js';
 import userRoute from './routes/useRoutes.js';
@@ -16,9 +15,7 @@ import UserModel from './models/userSchema.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Simular __dirname
-const __filename = typeof __filename !== 'undefined' ? __filename : fileURLToPath(import.meta.url);
-const __dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(__filename);
+
 
 // Middlewares
 app.use(morgan('dev'));
