@@ -14,7 +14,7 @@ export const verifyToken = async (req, res) => {
 
         if (!usuario) {
             // Usar process.cwd() para obtener la ruta desde el directorio actual
-            return res.status(404).sendFile(path.join(process.cwd(), 'public', 'error.html')); 
+            return res.status(404).sendFile(path.join(process.cwd(), './src/public', 'error.html')); 
             // Página de error si el usuario no es encontrado
         }
 
@@ -24,11 +24,11 @@ export const verifyToken = async (req, res) => {
         await usuario.save();
 
         // Enviar página de éxito
-        res.sendFile(path.join(process.cwd(), 'public', 'verify.html')); 
+        res.sendFile(path.join(process.cwd(), './src/public', 'verify.html')); 
 
     } catch (error) {
         console.error("Error al verificar el correo:", error);
-        res.status(500).sendFile(path.join(process.cwd(), 'public', 'error.html')); 
+        res.status(500).sendFile(path.join(process.cwd(), './src/public', 'error.html')); 
         // Página de error genérica en caso de problemas con la base de datos
     }
 };

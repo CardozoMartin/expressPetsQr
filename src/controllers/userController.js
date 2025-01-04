@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import nodemailer from "nodemailer";
 const emailUser = process.env.EMAIL_USER;
 const passUser = process.env.EMAIL_PASS;
+const Render = process.env.RENDER
 // Configurar el transporte de correo con nodemailer
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -53,7 +54,7 @@ export const postUser = async (req, res) => {
   try {
     const verificationToken = crypto.randomBytes(32).toString("hex");
     newUser.verificationToken = verificationToken;
-    const verificationLink = `http://localhost:5000/api/v1/verificar/${verificationToken}`;
+    const verificationLink = `${Render}/api/v1/verificar/${verificationToken}`;
 
     // Guardar el usuario en la base de datos
     await newUser.save();
@@ -192,7 +193,7 @@ export const recoverPassword = async (req, res) => {
     await usuario.save();
 
     // El link ahora usa la ruta /reset/:token
-    const resetLink = `http://localhost:5000/api/v1/registro/reset/${resetToken}`;
+    const resetLink = `${Render}/api/v1/registro/reset/${resetToken}`;
 
     const mailOptions = {
       from: emailUser,
@@ -345,7 +346,7 @@ export const showResetForm = async (req, res) => {
       
                 if (response.ok) {
                   alert('Contraseña actualizada exitosamente');
-                  window.location.href = '/login';
+                  window.location.href = 'https://petsqr.netlify.app/login';
                 } else {
                   error.textContent = data.message || 'Error al actualizar la contraseña';
                 }
