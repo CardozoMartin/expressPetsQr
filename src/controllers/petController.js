@@ -19,6 +19,10 @@ export const getPets = async (req, res) => {
         content: pet.content,
         image: pet.image,
         userID: pet.userID,
+        email: pet.email,
+        numberphoneAlter: pet.numberphoneAlter,
+        duenio: pet.duenio,
+        edad: pet.edad
       }));
     res.json({ data: petData, message: 'Mascotas encontradas' });
   } catch (e) {
@@ -60,6 +64,10 @@ export const getPetById = async (req, res) => {
       content: pet.content,
       image: pet.image,
       userID: pet.userID,
+      email: pet.email,
+      numberphoneAlter: pet.numberphoneAlter,
+      duenio: pet.duenio,
+      edad: pet.edad
     };
 
     res.json({ data: petData, message: 'Mascota encontrada' });
@@ -76,7 +84,7 @@ export const postPet = async (req, res) => {
   const body = req.body;
   const imagen = req.files.image;
 
-  console.log("la imagen" +imagen);
+  console.log("la imagen" + imagen);
 
   if (imagen && imagen.length > 0) {
     const { downloadURL } = await uploadFile(imagen[0]);
@@ -87,12 +95,16 @@ export const postPet = async (req, res) => {
       raza: body.raza,
       direccion: body.direccion,
       numberphone: body.numberphone,
-      facebook : body.facebook,
-      instagram : body.instagram,
+      facebook: body.facebook,
+      instagram: body.instagram,
       content: body.content,
       image: downloadURL,
       userID: body.userID,
       isActive: true,
+      email: body.email,
+      numberphoneAlter: body.numberphoneAlter,
+      duenio: body.duenio,
+      edad: body.edad
     }).save();
 
     return res.status(200).json(newPet);
@@ -162,7 +174,7 @@ export const deletePet = async (req, res) => {
   } = req;
 
   try {
-    const actionPet = await PetModel.updateOne(
+    const actionPet = await PetModel.deleteOne(
       { _id: id, isActive: true },
       { isActive: false },
     );

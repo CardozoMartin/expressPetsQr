@@ -15,11 +15,22 @@ const Pet = new mongoose.Schema({
   },
   direccion: { type: String, require: true },
   numberphone: { type: String, require: true },
+  numberphone: { type: String, require: true },
+
   facebook: { type: String },
   instagram: { type: String },
   content: { type: String },
   image: {
     type: String,
+  },
+  email:{
+    type:String
+  },
+  duenio:{
+    type:String, require:true
+  },
+  edad:{
+    type:String
   },
   userID: {
     type: String,
