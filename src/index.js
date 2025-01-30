@@ -10,6 +10,7 @@ import authRoute from './routes/authRoute.js';
 import petRoute from './routes/petRoute.js';
 import commentRoute from './routes/commentRoute.js';
 import tokenRoute from './routes/tokenRoute.js';
+import contactRoute from './routes/contactRoute.js'
 import UserModel from './models/userSchema.js';
 
 const app = express();
@@ -52,6 +53,7 @@ app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/pet', petRoute);
 app.use('/api/v1/comments', commentRoute);
 app.use("/api/v1/verificar", tokenRoute);
+app.use('/api/v1/contact',contactRoute)
 
 // Iniciar el servidor
 app.listen(PORT, () => {
