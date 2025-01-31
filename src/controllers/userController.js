@@ -357,7 +357,7 @@ export const showResetForm = async (req, res) => {
               icon: 'success',
               confirmButtonText: 'Aceptar',
             }).then(() => {
-              window.location.href = 'https://petsqr.netlify.app/login';
+              window.location.href = 'https://petsqrv2.netlify.app/login';
             });
           } else {
             // Usar SweetAlert para mostrar el error
